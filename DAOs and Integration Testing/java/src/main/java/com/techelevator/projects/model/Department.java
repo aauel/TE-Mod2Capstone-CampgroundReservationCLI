@@ -22,6 +22,7 @@ public class Department {
 	}
 	
 	public String toString() {
-		return this.name;
+		return this.name + " " + this.id;
 	}
+	
 }
