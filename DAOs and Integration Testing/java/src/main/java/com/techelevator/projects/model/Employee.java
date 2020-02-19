@@ -54,6 +54,6 @@ public class Employee {
 		this.hireDate = hireDate;
 	}
 	public String toString() {
-		return lastName + ", " + firstName;
+		return employeeId + ": " + lastName + ", " + firstName;
 	}
 }

@@ -35,8 +35,7 @@ public class JDBCEmployeeDAO implements EmployeeDAO {
 	
 	@Override
 	public List<Employee> getAllEmployees() {
-		
-		List<Employee> emps = new ArrayList<>();
+		List<Employee> emps = new ArrayList<Employee>();
 		String sql = "SELECT * FROM employee;";
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
 		while (results.next()) {

@@ -36,9 +36,9 @@ public class JDBCProjectDAO implements ProjectDAO {
 	public List<Project> getAllActiveProjects() {
 		List<Project> projectList = new ArrayList<Project>();
 		LocalDate currentDate = LocalDate.now();
-		String sql = "SELECT * FROM project WHERE from_date IS NOT NULL "
+		String sql = "SELECT * FROM project WHERE from_date IS NOT NULL AND (from_date < ?)"
 					+ "AND (to_date IS NULL OR to_date > ?);";
-		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, currentDate);
+		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, currentDate, currentDate);
 		while(results.next()) {
 			projectList.add(rowToProject(results));
 		}
