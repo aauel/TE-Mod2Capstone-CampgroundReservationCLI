@@ -1,5 +1,6 @@
 package com.techelevator.campground.model.jdbc;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,12 +39,20 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 		@Override
 		public Campground getCampgroundByCampgroundId(int campground_id) {
 			Campground camp = new Campground();
-			String sql = "SELECT * FROM campground WHERE campground_id = ?";
+			String sql = "SELECT * FROM campground WHERE campground_id = ?;";
 			SqlRowSet result = jdbcTemplate.queryForRowSet(sql, campground_id);
 			while(result.next()) {
 				camp = mapRowToCampground(result);
 			}
 			return camp;
+		}
+		
+		@Override
+		public BigDecimal getDailyFeeByCampgroundId(int campground_id) {
+			String slq = "SELECT daily_fee FROM campground WHERE campground_id = ?;";
+			SqlRowSet result = jdbcTemplate.queryForRowSet(slq, campground_id);
+			result.next();
+			return result.getBigDecimal("daily_fee");
 		}
 		
 		//Creates a Campground object from a sqlRow
@@ -57,5 +66,6 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 			campground.setDaily_fee(row.getBigDecimal("daily_fee"));
 			return campground;
 		}
+		
 	
 }

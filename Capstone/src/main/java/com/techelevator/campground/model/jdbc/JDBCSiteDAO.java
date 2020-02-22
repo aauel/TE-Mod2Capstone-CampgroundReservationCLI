@@ -1,5 +1,6 @@
 package com.techelevator.campground.model.jdbc;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class JDBCSiteDAO implements SiteDAO {
 	}
 
 	@Override
-	public List<Site> availableSites(String campground_name, String arrivalDate, String departureDate) {
+	public List<Site> getTop5AvailableSites(String campground_name, LocalDate arrivalDate, LocalDate departureDate) {
 		List<Site> sites = new ArrayList<Site>();
 		String sql = "SELECT DISTINCT site.site_id, site.campground_id, site_number, max_occupancy, accessible, max_rv_length, utilities " + 
 					 "FROM site " + 

@@ -34,6 +34,19 @@ public class JDBCParkDAO implements ParkDAO {
 		return parks;
 	}
 	
+	//Gets a list of park names in system, sorted alphabetically
+	@Override
+	public List<String> getAllParkNames() {
+		List<String> parks = new ArrayList<String>();
+		String sql = "SELECT name "
+					+ "FROM park ORDER BY name;";
+		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
+		while(results.next()) {
+			parks.add(results.getString("name"));
+		}
+		return parks;
+	}
+	
 	//Gets park_Id from name
 	@Override
 	public int getParkIdByName(String park_name) {
@@ -58,19 +71,6 @@ public class JDBCParkDAO implements ParkDAO {
 		return park;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	//Creates a Park object from a sqlRow
 	private Park mapRowToPark(SqlRowSet row) {
 		Park park = new Park();
@@ -83,6 +83,5 @@ public class JDBCParkDAO implements ParkDAO {
 		park.setDescription(row.getString("description"));
 		return park;
 	}
-	
 	
 }

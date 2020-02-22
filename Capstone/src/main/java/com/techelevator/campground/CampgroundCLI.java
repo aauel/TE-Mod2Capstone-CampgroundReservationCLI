@@ -34,15 +34,20 @@ public class CampgroundCLI {
 	private ReservationDAO reservationDao;
 	private Scanner scan = new Scanner(System.in);
 	
-	private static final String PARK_MENU_VIEW_CAMPGROUNDS = "View Campgrounds";
+	private static final String PARK_MENU_VIEW_CAMPGROUNDS = "View This Park's Campgrounds";
 	private static final String PARK_MENU_SEARCH_FOR_RESERVATION = "Search for Reservation";
 	private static final String PARK_MENU_RETURN_TO_PREVIOUS_SCREEN = "Return to Previous Screen";
 	private static final String[] PARK_MENU_OPTIONS = new String[] {PARK_MENU_VIEW_CAMPGROUNDS, 
-								PARK_MENU_RETURN_TO_PREVIOUS_SCREEN};
-	private static final String CAMPGROUND_VIEW_RESERVATIONS = "Search for Available Reservation In Specific Campground";
+																	PARK_MENU_RETURN_TO_PREVIOUS_SCREEN};
+//	private static final String CAMPGROUND_RESERVE_ANY_CAMPGROUND = "Find Available Sites in Any of These Campgrounds";
+	private static final String CAMPGROUND_RESERVE_SPECIFIC_CAMPGROUND = "Find Available Sites for a Specific Campground";
 	private static final String CAMPGROUND_RETURN_TO_PREVIOUS_SCREEN = "Return to Previous Screen";
-	private static final String[] CAMPGROUND_MENU_OPTIONS = new String[] {CAMPGROUND_VIEW_RESERVATIONS, 
-								CAMPGROUND_RETURN_TO_PREVIOUS_SCREEN };
+	private static final String[] CAMPGROUND_MENU_OPTIONS = new String[] {CAMPGROUND_RESERVE_SPECIFIC_CAMPGROUND, 
+																		  CAMPGROUND_RETURN_TO_PREVIOUS_SCREEN };
+	private static final String CAMPGROUND_CLOSED_NEW_DATES = "Try new dates for this campground";
+	private static final String CAMPGROUND_CLOSED_SWITCH_CAMPGROUND = "Try a different campground";
+	private static final String[] CAMPGROUND_CLOSED_OPTIONS = new String[] {CAMPGROUND_CLOSED_NEW_DATES, 
+																			CAMPGROUND_CLOSED_SWITCH_CAMPGROUND };
 	
 
 	public static void main(String[] args) {
@@ -50,152 +55,176 @@ public class CampgroundCLI {
 		application.run();
 	}
 	
-	public CampgroundCLI() {
-		this.menu = new Menu(System.in, System.out);
-		
-		BasicDataSource dataSource = new BasicDataSource();
-		dataSource.setUrl("jdbc:postgresql://localhost:5432/campground");
-		dataSource.setUsername("postgres");
-		dataSource.setPassword("postgres1");
-		
-		campgroundDao = new JDBCCampgroundDAO(dataSource);
-		siteDao = new JDBCSiteDAO(dataSource);
-		reservationDao = new JDBCReservationDAO(dataSource);
-		parkDao = new JDBCParkDAO(dataSource);	
-	}
-	
-	private String[] populateMainMenu() {
-		List<Park> parks = parkDao.getAllParks();
-		String[] parkNames = new String[parks.size() + 1];
-		for (int i = 0; i < parks.size(); i++) {
-			parkNames[i] = parks.get(i).getName();
-		}
-		parkNames[parkNames.length - 1] = "Quit";
-		return parkNames;
-	}
-
+	/***********************************************************************************
+	 * This method starts the application interface with the user.  It calls 
+	 * getAllParkNames() to display as menu options for the user to choose from 
+	 */
 	public void run() {
 		while (true) {
-			System.out.println("View Parks Interface");
-			System.out.println("Select a Park for Further Details");
-			String choice = (String) menu.getChoiceFromOptions(populateMainMenu());
+			System.out.println("\n\nSelect a Park for Further Details");
+			String choice = (String) menu.getChoiceFromOptions(getAllParkNames());
 			Park park = parkDao.getParkByName(choice);
 			handleParkChoice(park);
 		}
 	}
 	
+	
+	/*********************************************************************************** 
+	 * This method calls displayPark() to display the chosen park information to the   
+	 * console, then prompts the user to view campgrounds, or return to the main menu
+	 * 
+	 * @param parkChosen to retrieve list of campgrounds from campground Dao
+	 */
 	private void handleParkChoice(Park parkChosen) {
 		displayPark(parkChosen);
 		String choice = (String) menu.getChoiceFromOptions(PARK_MENU_OPTIONS);
 		if (choice.equals(PARK_MENU_VIEW_CAMPGROUNDS)) {
-			int chosen_park_id = parkDao.getParkIdByName(parkChosen.getName());
-			handleViewCampgrounds(chosen_park_id, parkChosen);
+			viewCampgrounds(parkChosen);
 		} else if (choice.equals(PARK_MENU_SEARCH_FOR_RESERVATION)) {
 			//BONUS if we get to it
+		} else {
+			run();  // return to list of parks
 		}
 	}
 	
-	private void displayPark(Park parkChosen) {
-		System.out.println();
-		System.out.println("Park Information Screen");
-		System.out.println(parkChosen.getName() + " Park");
-		System.out.format("%-17s %s\n", "Location:", parkChosen.getLocation());
-		System.out.format("%-17s %tD\n", "Established:", parkChosen.getEstablish_date());
-		System.out.format("%-17s %,d acres\n", "Area:", parkChosen.getArea());
-		System.out.format("%-17s %,d\n", "Annual Visitors:", parkChosen.getVisitors());
-		String description = parkChosen.getDescription();
-		System.out.print("\n" + shortenStringFullWords(description, 100));
-	}
 	
-	public String shortenStringFullWords(String str, int maxLength) {
-		String result = "";
-		String line = "";
-		String[] tokens = str.split(" ");
-		for (String token : tokens) {
-			if (line.length() + token.length() <= maxLength - 3) {
-				line += token;
-				line += " ";
-			} else {
-				result += line + "\n";
-				line = "";
-			}
-		}
-		return result;
-	}
-	
-	private void handleViewCampgrounds(int chosen_park_id, Park parkChosen) {
-		System.out.println("Park Campgrounds");
-		List<Campground> campgrounds = campgroundDao.getCampgroundsInPark(chosen_park_id);
-		displayCampgrounds(parkChosen, campgrounds);
+	/*********************************************************************************** 
+	 * This method calls displayCampgrounds() to display a list of campgrounds and 
+	 * corresponding attributes for a specific park, then prompts the user to start a 
+	 * reservation or return to the previous screen
+	 * 
+	 * @param parkChosen to retrieve list of campgrounds from campground Dao
+	 */
+	private void viewCampgrounds(Park parkChosen) {
+		List<Campground> campgroundsInChosenPark = campgroundDao.getCampgroundsInPark(parkChosen.getPark_id());
+		displayCampgrounds(parkChosen.getName(), campgroundsInChosenPark);
 		String choice = (String) menu.getChoiceFromOptions(CAMPGROUND_MENU_OPTIONS);
-		if (choice.equals(CAMPGROUND_VIEW_RESERVATIONS)) {
-			handleReservationSearch(parkChosen, campgrounds, chosen_park_id);
+		if (choice.equals(CAMPGROUND_RESERVE_SPECIFIC_CAMPGROUND)) {
+			startReservation(parkChosen, campgroundsInChosenPark);
 		} else if (choice.equals(CAMPGROUND_RETURN_TO_PREVIOUS_SCREEN)) {
 			handleParkChoice(parkChosen);
 		}
 	}
 	
-	private void handleReservationSearch(Park parkChosen, List<Campground> campgrounds, int chosen_park_id) {
-		System.out.println("Search for Campground Reservation");
-		displayCampgrounds(parkChosen, campgrounds);
-		System.out.println("\nWhich campground (enter 0 to cancel)?");
-		try {
-			int campgroundInput = Integer.parseInt(scan.nextLine());
-			if (campgroundInput != 0) {
-				if(seeIfCampgroundIsValid(parkChosen, campgroundInput)) {
-					Campground campgroundChosen = campgrounds.get(campgroundInput - 1);
-					handleReservationRequest(campgroundChosen, campgrounds, parkChosen);		
-				} else {
-					System.out.println("Not a valid campground");
-					handleViewCampgrounds(chosen_park_id, parkChosen);
-				}
-			} else {
-				handleViewCampgrounds(chosen_park_id, parkChosen);
-			}
-		} catch(NumberFormatException e) {
-			System.out.println("Not a valid campground, try again.");
-			handleReservationSearch(parkChosen, campgrounds, chosen_park_id);
-		}	
-	}
 	
-	private void handleReservationRequest(Campground campgroundChosen, List<Campground> campgrounds, Park parkChosen) {
-		boolean datesChosen = false;
-		while(!datesChosen) {
-			System.out.println("What is the arrival date? (YYYY-MM-DD)");
-			String arrivalDate = scan.nextLine();
+	/*********************************************************************************** 
+	 * This method prints a list of campgrounds and corresponding attributes for a 
+	 * specific park chosen, then prompts the user to choose a campground to continue
+	 * their reservation.
+	 * 
+	 * @param parkChosenName to display the name of the park in the header
+	 * @param campgroundsInChosenPark to display the campground name, the months open, 
+	 * 		  and the daily fee, in a tabular format
+	 */
+	private void startReservation(Park parkChosen, List<Campground> campgroundsInChosenPark) {
+		boolean restartReservation = false;
+		while (!restartReservation) {
+			displayCampgrounds(parkChosen.getName(), campgroundsInChosenPark);
+			System.out.println();
 			try {
-				LocalDate parsedArrivalDate = LocalDate.parse(arrivalDate);
-				System.out.println("What is the departure date? (YYYY-MM-DD)");
-				String departureDate = scan.nextLine();
-				LocalDate parsedDepartureDate = LocalDate.parse(departureDate);
-				datesChosen = true;
-				int campground_id = campgroundChosen.getCampground_id();
-				if (chosenDatesValidForCampground(campground_id, parsedArrivalDate, parsedDepartureDate)) {
-					List<Site> sites = siteDao.availableSites(campgroundChosen.getName(), 
-										arrivalDate, departureDate);
-					if(sites.size() == 0) {
-						System.out.println("No sites available");
-						return;
+				int campgroundInput = Integer.parseInt(getUserInput("\nWhich campground (enter 0 to cancel)?"));
+				if (campgroundInput != 0) {
+					if(campgroundInput <= campgroundsInChosenPark.size()) {
+						
+						/***** HAPPY PATH *****/
+						Campground campgroundChosen = campgroundsInChosenPark.get(campgroundInput - 1);
+						restartReservation = getReservationDates(campgroundChosen);
+						
 					} else {
-						handleMakingReservation(sites, campgrounds, arrivalDate, departureDate, 
-												campgroundChosen, parsedArrivalDate, parkChosen);	
+						System.out.println("Not a valid campground");
 					}
 				} else {
-					System.out.println("\nSorry, this campground is closed during those dates.\n");
-					handleReservationSearch(parkChosen, campgrounds, parkChosen.getPark_id());	
+					viewCampgrounds(parkChosen);
 				}
-			} catch(DateTimeParseException e) {
-				System.out.println("Invalid date format, try again.");
-			}
+			} catch(NumberFormatException e) {
+				System.out.println("Not a valid campground, try again.");
+			}	
 		}
 	}
 	
-	private boolean chosenDatesValidForCampground(int campground_id, LocalDate parsedArrivalDate, 
+	
+	/*********************************************************************************** 
+	 * This method prompts the user for an arrival and departure date, checks for valid
+	 * date input, checks the dates against the campground's open season, and then 
+	 * moves forward only if there are available sites for the campground and dates
+	 * 
+	 * @param campgroundChosen to compare to open_to and open_from months, and to look
+	 * 		  for available sites to reserve
+	 * @return true if the dates were entered in the correct order
+	 */
+	private boolean getReservationDates(Campground campgroundChosen) {
+		boolean validDates = false;
+		while(!validDates) {
+			try {
+				// Prompt user for arrival and departure dates
+				String arrivalDate = getUserInput("What is the arrival date? (YYYY-MM-DD)");
+				LocalDate parsedArrivalDate = LocalDate.parse(arrivalDate);
+				String departureDate = getUserInput("What is the departure date? (YYYY-MM-DD)");
+				LocalDate parsedDepartureDate = LocalDate.parse(departureDate);
+				
+				/* TESTING ONLY */
+//				LocalDate parsedArrivalDate = LocalDate.of(2020, 2, 2);
+//				LocalDate parsedDepartureDate = LocalDate.of(2020, 2, 20);
+				
+				System.out.println("-------------------------------------------------------------------------------------------------");
+			
+				if (validDatePeriod(parsedArrivalDate, parsedDepartureDate)) {
+					// departureDate > arrivalDate
+					if (chosenDatesValidForCampground(campgroundChosen, parsedArrivalDate, parsedDepartureDate)) {
+						/***** HAPPY PATH *****/
+						validDates = checkForAvailableSites(campgroundChosen.getName(), 
+															parsedArrivalDate, parsedDepartureDate);
+						// if no sites available, return to beginning of while loop to prompt for new dates						
+					} else {
+						System.out.println("\nSorry, this campground is closed during those dates.\n");
+						System.out.println("How would you like to proceed?");
+
+						String choice = (String) menu.getChoiceFromOptions(CAMPGROUND_CLOSED_OPTIONS);
+						if (choice.equals(CAMPGROUND_CLOSED_SWITCH_CAMPGROUND)) {
+							return false;
+							// jump out of getReservationDates to go back to startReservation where 
+							// user will be presented with other campgrounds in the same park
+						}
+					}
+				}
+			} catch(DateTimeParseException e) {
+				// user input could not be parsed into a LocalDate
+				System.out.println("Invalid date format, try again.");
+				// return to beginning of while(!validDates) to prompt for new dates
+			}
+		}
+		return true;
+	}
+	
+	
+	/*********************************************************************************** 
+	 * This method checks that the arrival date precedes the departure date entered
+	 * 
+	 * @return true if the dates were entered in the correct order
+	 */
+	private boolean validDatePeriod(LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
+		Period period = Period.between(parsedArrivalDate, parsedDepartureDate);
+		if(period.getDays() < 1) {
+			System.out.println("Invalid dates. Try again.\n");
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	
+	/*********************************************************************************** 
+	 * This method checks that the arrival and departure dates entered against the
+	 * specific campground's open season
+	 * 
+	 * @param campgroundChosen
+	 * @return true if the dates fall inside the campground's open season
+	 */
+	private boolean chosenDatesValidForCampground(Campground campgroundChosen, LocalDate parsedArrivalDate, 
 													LocalDate parsedDepartureDate) {
 		 boolean result = false;
-		 Campground campChosen = campgroundDao.getCampgroundByCampgroundId(campground_id);
-		 int from_month = Integer.parseInt(campChosen.getOpen_from_mm());
-		 int to_month = Integer.parseInt(campChosen.getOpen_to_mm());
+		 int from_month = Integer.parseInt(campgroundChosen.getOpen_from_mm());
+		 int to_month = Integer.parseInt(campgroundChosen.getOpen_to_mm());
 		 
 		 int parsedArrivalMonth = parsedArrivalDate.getMonthValue();
 		 int parsedDepartureMonth = parsedDepartureDate.getMonthValue();
@@ -207,87 +236,252 @@ public class CampgroundCLI {
 		 }		
 		 return result;
 	}
+
 	
-	private boolean seeIfCampgroundIsValid(Park parkChosen, int campgroundInput) {
-		boolean result = false;
-		List<Campground> campgrounds = campgroundDao.getCampgroundsInPark(parkChosen.getPark_id());
-		for (Campground c : campgrounds) {
-			if (c.getCampground_id() == campgroundInput) {
-				result = true;
-			}
-		}
-		return result;
-	}
-	
-	private boolean seeIfSiteIsValid(int siteChosen, List<Site> sites) {
-		boolean result = false;
-		for (Site s : sites) {
-			if (s.getSite_id() == siteChosen) {
-				result = true;
-			}
-		}
-		return result;
-	}
-	
-	private void displayCampgrounds(Park parkChosen, List<Campground> campgrounds) {
-		int num = 1;
-		System.out.println(parkChosen.getName() + " Park Campgrounds");
-		System.out.format("%11s %35s %11s %15s", "Name", "Open", "Close", "Daily Fee\n");
-		for (Campground c : campgrounds) {
-			String open_from = new DateFormatSymbols().getMonths()[Integer.parseInt(c.getOpen_from_mm()) - 1];
-			String open_to = new DateFormatSymbols().getMonths()[Integer.parseInt(c.getOpen_to_mm()) - 1];
-			System.out.format("#%-5d %-35s %-10s %-10s $%.2f\n", num, c.getName(), 
-					open_from, open_to, c.getDaily_fee());
-			num++;
-		}
-	}
-	
-	private void handleMakingReservation(List<Site> sites, List<Campground> campgrounds, String arrivalDate, 
-										String departureDate, Campground campgroundChosen, LocalDate parsedArrivalDate,
-										Park parkChosen) {
-		Period period = Period.between(LocalDate.parse(arrivalDate), LocalDate.parse(departureDate));
-		int days = period.getDays();
-		if(days < 1) {
-			System.out.println("Invalid dates. Try again.\n");
-			handleReservationRequest(campgroundChosen, campgrounds, parkChosen);
+	/*********************************************************************************** 
+	 * This method checks that there is at least 1 available site for the dates entered,
+	 * and if so, calls getSitesForChosenDates() to continue with reservation.
+	 * 
+	 * @return false if the dates fall outside the campground's open season
+	 */
+	private boolean checkForAvailableSites(String campgroundName, LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
+		
+		List<Site> sites = siteDao.getTop5AvailableSites(campgroundName, parsedArrivalDate, parsedDepartureDate);
+		if(sites.size() == 0) {
+			System.out.println("No sites available during those dates.");
+			return false;
+			// return to getReservationDates()
 		} else {
-			handleValidReservationRequest(sites, campgrounds, campgroundChosen, days, parkChosen, parsedArrivalDate);
+			/***** HAPPY PATH *****/
+			int days = Period.between(parsedArrivalDate, parsedDepartureDate).getDays();
+			return getSitesForChosenDates(sites, parsedArrivalDate, days);	
 		}
 	}
-	
-	private void handleValidReservationRequest(List<Site> sites, List<Campground> campgrounds, Campground campgroundChosen,
-			int days, Park parkChosen, LocalDate parsedArrivalDate) {
-		printAvailableSites(sites, campgroundChosen, days);
-		System.out.println("Which site should be reserved (enter 0 to cancel)?");
-		try {
-			int siteReserved = Integer.parseInt(scan.nextLine());
-			if (siteReserved == 0) {
-				handleReservationSearch(parkChosen, campgrounds, parkChosen.getPark_id());
-			} else if (!seeIfSiteIsValid(siteReserved, sites)) {
-				System.out.println("Not a valid site, try again.");
-				handleValidReservationRequest(sites, campgrounds, campgroundChosen, days, parkChosen, parsedArrivalDate);
-			} else {
-				System.out.println("What name should the reservation be made under? ");
-				String reservationName = scan.nextLine();
-				int reservation_id = reservationDao.createReservationAndReturnId(reservationName, siteReserved,
-						parsedArrivalDate, days);
-				System.out.println("\nThe reservation has been made and the confirmation Id is " + reservation_id);
+
+
+	/*********************************************************************************** 
+	 * This method displays 
+	 * 
+	 * @param sites contains between 1 and 5 Sites that are available to reserve for the
+	 * 		  user's chosen campground and requested dates
+	 * @param parsedArrivalDate for the reservation record
+	 * @param days for the reservation record
+	 * 
+	 * @return false if the user selects 0 to cancel
+	 */
+	private boolean getSitesForChosenDates(List<Site> sites, LocalDate parsedArrivalDate, int days) {
+		// first print out the available sites and their attributes
+		printAvailableSites(sites, days);
+		boolean validSiteChosen = false;
+		while(validSiteChosen == false) {
+			try {
+				// prompt the user to select a site, or 0 to cancel
+				int choice = Integer.parseInt(getUserInput("\nWhich site should be reserved (enter 0 to cancel)?"));
+				if (choice == 0) {
+					// user entered 0 to cancel, so exit the method
+					return false;
+				} else if (choice > sites.size()) {
+					// user entered a number higher than the number of sites listed
+					System.out.println("Please enter a site number from the list above.");
+					// restart while loop to make another site selection
+				} else {
+					/***** HAPPY PATH *****/
+					// prompt for a name for the reservation and then add new reservation to the database
+					validSiteChosen = true;
+					int site_id = sites.get(choice -1).getSite_id();
+					finalizeReservation(site_id, parsedArrivalDate, days);
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Not a valid site number.  Please try again.");
+				// restart while loop to make another site selection
 			}
-		} catch (NumberFormatException e) {
-			System.out.println("Not a valid site number, try again.");
-			handleValidReservationRequest(sites, campgrounds, campgroundChosen, days, parkChosen, parsedArrivalDate);
 		}
+		return true;
 	}
 	
-	private void printAvailableSites(List<Site> sites, Campground campground, int days) {
+	
+	/*********************************************************************************** 
+	 * This method prints a list of sites and corresponding attributes, including the
+	 * total cost of a reservation based on the campground chosen, and number of days
+	 * 
+	 * @param sites to retrieve all of the attributes
+	 * @param days to calculate the total cost based on the campground daily fee
+	 */
+	private void printAvailableSites(List<Site> sites, int days) {
+		// pull campground_id from site in order to get the daily_fee for calculating total cost of reservation
+		int campground_id = sites.get(0).getCampground_id();
+		BigDecimal dailyFee = campgroundDao.getDailyFeeByCampgroundId(campground_id);
+		
 		System.out.println("\nResults Matching Your Search Criteria");
 		System.out.format("%-10s %-10s %-13s %-15s %-10s %s", "Site No.", "Max Occup.", "Accessible?", "Max Rv Length"
 							, "Utility", "Cost\n");
 		for (Site site : sites) {
-			System.out.format("%-10d %-10d %-13b %-15d %-10b $%.2f\n", site.getSite_number(), site.getMax_occupancy(),
-							site.isAccessible(), site.getMax_rv_length(), site.isUtilities(), 
-							(campground.getDaily_fee().multiply(new BigDecimal(days))));		
+			System.out.format("%-10d %-10d %-13s %-15s1 %-10s $%.2f\n", site.getSite_number(), site.getMax_occupancy(),
+							getYesNo(site.isAccessible()), getNumOrNA(site.getMax_rv_length()), 
+							getYesNo(site.isUtilities()), dailyFee.multiply(new BigDecimal(days)));		
 		}
+	}
+	
+	
+	/*********************************************************************************** 
+	 * This method prompts the user for a name for their reservation, then inserts a
+	 * new reservation into the database for the chosen site and dates
+	 * 
+	 * @param site_id to associate the reservation to the correct site in the database
+	 * @param parsedArrivalDate for the reservation record
+	 * @param days for the reservation record
+	 */
+	private void finalizeReservation(int site_id, LocalDate parsedArrivalDate, int days) {
+		String reservationName = "";
+		while (reservationName.length() == 0) {
+			reservationName = getUserInput("What name should the reservation be made under? ");
+		}
+		int reservation_id = reservationDao.createReservationAndReturnId(reservationName, site_id, parsedArrivalDate, days);
+		
+		System.out.println("-------------------------------------------------------------------------------------------------");
+		System.out.println("\nThe reservation has been made and the confirmation Id is " + reservation_id);
+		System.out.println("\n-------------------------------------------------------------------------------------------------");	
+	}
+	
+	
+	
+	
+/* ----------------------------------------------------------------------------------------
+ * 
+ *  HELPER METHODS - No application flow is determined in these methods.
+ * 
+ * ---------------------------------------------------------------------------------------- */	
+	
+	
+	/***********************************************************************************
+	 * This method initializes a new Menu, establishes the database connection,
+	 * creates jdbc DAOs for each class (park, campground, site, reservation) and
+	 * prints out the welcome banner.
+	 */
+	public CampgroundCLI() {
+		this.menu = new Menu(System.in, System.out);
+		
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setUrl("jdbc:postgresql://localhost:5432/campground");
+		dataSource.setUsername("postgres");
+		dataSource.setPassword("postgres1");
+		
+		parkDao = new JDBCParkDAO(dataSource);	
+		campgroundDao = new JDBCCampgroundDAO(dataSource);
+		siteDao = new JDBCSiteDAO(dataSource);
+		reservationDao = new JDBCReservationDAO(dataSource);
+		
+		
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("WELCOME TO THE NATIONAL PARK CAMPSITE RESERVATION SYSTEM!");
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	}
+	
+	
+	/***********************************************************************************
+	 *  This method retrieves a list of park names from the parkDao
+	 * 
+	 * @return String[] of park names in order to populate menu options
+	 */
+	private String[] getAllParkNames() {
+		List<String> parks = parkDao.getAllParkNames();
+		String[] parkNames = new String[parks.size() + 1];
+		for (int i = 0; i < parks.size(); i++) {
+			parkNames[i] = parks.get(i);
+		}
+		parkNames[parkNames.length - 1] = "Quit";
+		return parkNames;
+	}
+	
+	
+	/*********************************************************************************** 
+	 * This method prints park information to the system console, including location, 
+	 * established date, area, annual visitors, and description.
+	 * 
+	 * @param parkChosenName to retrieve the attributes for the chosen park
+	 */
+	private void displayPark(Park parkChosen) {
+		System.out.println();
+		System.out.println("-------------------------------------------------------------------------------------------------");
+		System.out.println(parkChosen.getName() + " Park Information\n");
+		System.out.format("%-17s %s\n", "Location:", parkChosen.getLocation());
+		System.out.format("%-17s %tD\n", "Established:", parkChosen.getEstablish_date());
+		System.out.format("%-17s %,d acres\n", "Area:", parkChosen.getArea());
+		System.out.format("%-17s %,d\n", "Annual Visitors:", parkChosen.getVisitors());
+		System.out.println();
+		shortenStringFullWords(parkChosen.getDescription(), 90);
+		System.out.println("\n-------------------------------------------------------------------------------------------------");
+	}
+	
+	
+	/*********************************************************************************** 
+	 * This method is used by displayPark to break up the park description over
+	 * multiple lines when printing to the console.
+	 * 
+	 * @param s is the park description without any formatting
+	 * @param maxLength dictates when to insert a new line
+	 */
+	private void shortenStringFullWords(String s, int maxLength){
+		int charsWritten = 0;
+		for(String w : s.split("\\s+")){
+			if (charsWritten + w.length() > maxLength){
+				System.out.println();
+				charsWritten = 0;
+			}
+			System.out.print(w+" ");
+			charsWritten += w.length() + 1;
+		}
+	}
+	
+	/*********************************************************************************** 
+	 * This method prints a list of campgrounds and corresponding attributes for a 
+	 * specific park to the system console
+	 * 
+	 * @param parkChosenName to display the name of the park in the header
+	 * @param campgroundsInChosenPark to display the campground name, the months open, 
+	 * 		  and the daily fee, in a tabular format
+	 */
+	private void displayCampgrounds(String parkChosenName, List<Campground> campgroundsInChosenPark) {
+		int num = 1;
+		System.out.println();
+		System.out.println("-------------------------------------------------------------------------------------------------");
+		System.out.println(parkChosenName + " Park Campgrounds\n");
+		System.out.format("%9s %35s %11s %15s", "Name", "Open", "Close", "Daily Fee\n");
+		for (Campground c : campgroundsInChosenPark) {
+			String open_from = new DateFormatSymbols().getMonths()[Integer.parseInt(c.getOpen_from_mm()) - 1];
+			String open_to = new DateFormatSymbols().getMonths()[Integer.parseInt(c.getOpen_to_mm()) - 1];
+			System.out.format("#%-3d %-35s %-10s %-10s $%.2f\n", num, c.getName(), 
+					open_from, open_to, c.getDaily_fee());
+			num++;
+		}
+		System.out.println("-------------------------------------------------------------------------------------------------");
+	}
+	
+	
+	/*********************************************************************************** 
+	 * This method converts true/false to Yes/No, respectively, as a string
+	 */
+	private String getYesNo(boolean bool) {
+		String result = "No";
+		if (bool) result = "Yes";
+		return result;		
+	}
+	
+	/*********************************************************************************** 
+	 * This method takes an integer, and returns "N/A" if num == 0, otherwise, the
+	 * number in a string format
+	 */
+	private String getNumOrNA(int num) {
+		String result = "N/A";
+		if (num > 0) result = Integer.toString(num);
+		return result;		
+	}	
+	
+	
+	@SuppressWarnings("resource")
+	private String getUserInput(String prompt) {
+		System.out.print(prompt + " >>> ");
+		return new Scanner(System.in).nextLine();
 	}
 	
 }
