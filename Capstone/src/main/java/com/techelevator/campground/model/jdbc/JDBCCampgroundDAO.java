@@ -25,7 +25,8 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 		@Override
 		public List<Campground> getCampgroundsInPark(int chosen_park_id) {
 			List<Campground> campgrounds = new ArrayList<Campground>();
-			String sql = "SELECT * "
+			String sql = "SELECT campground.campground_id, campground.park_id, campground.name, " +
+						 "campground.open_from_mm, campground.open_to_mm, campground.daily_fee "
 					   + "FROM campground " 
 					   + "JOIN park ON campground.park_id = park.park_id "
 					   + "WHERE park.park_id = ? ORDER BY campground.name;";
@@ -39,7 +40,8 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 		@Override
 		public Campground getCampgroundByCampgroundId(int campground_id) {
 			Campground camp = new Campground();
-			String sql = "SELECT * FROM campground WHERE campground_id = ?;";
+			String sql = "SELECT campground_id, park_id, name, open_from_mm, open_to_mm, daily_fee " +
+						 "FROM campground WHERE campground_id = ?;";
 			SqlRowSet result = jdbcTemplate.queryForRowSet(sql, campground_id);
 			while(result.next()) {
 				camp = mapRowToCampground(result);

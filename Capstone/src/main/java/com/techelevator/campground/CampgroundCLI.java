@@ -316,7 +316,7 @@ public class CampgroundCLI {
 		System.out.format("%-10s %-10s %-13s %-15s %-10s %s", "Site No.", "Max Occup.", "Accessible?", "Max Rv Length"
 							, "Utility", "Cost\n");
 		for (Site site : sites) {
-			System.out.format("%-10d %-10d %-13s %-15s1 %-10s $%.2f\n", site.getSite_number(), site.getMax_occupancy(),
+			System.out.format("%-10d %-10d %-13s %-15s %-10s $%.2f\n", site.getSite_number(), site.getMax_occupancy(),
 							getYesNo(site.isAccessible()), getNumOrNA(site.getMax_rv_length()), 
 							getYesNo(site.isUtilities()), dailyFee.multiply(new BigDecimal(days)));		
 		}
