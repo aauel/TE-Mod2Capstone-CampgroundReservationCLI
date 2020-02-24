@@ -281,7 +281,7 @@ public class CampgroundCLI {
 				if (choice == 0) {
 					// user entered 0 to cancel, so exit the method
 					return false;
-				} else if (choice > sites.size() || choice < 0) {
+				} else if (!seeIfSiteIsValid(choice, sites)) {
 					// user entered a number higher than the number of sites listed
 					System.out.println("Please enter a site number from the list above.");
 					// restart while loop to make another site selection
@@ -456,6 +456,16 @@ public class CampgroundCLI {
 			num++;
 		}
 		System.out.println("-------------------------------------------------------------------------------------------------");
+	}
+	
+	private boolean seeIfSiteIsValid(int siteChosen, List<Site> sites) {
+		boolean result = false;
+		for (Site s : sites) {
+			if (s.getSite_number() == siteChosen) {
+				result = true;
+			}
+		}
+		return result;
 	}
 	
 	
