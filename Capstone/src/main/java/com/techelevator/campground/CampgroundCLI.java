@@ -124,7 +124,8 @@ public class CampgroundCLI {
 			try {
 				int campgroundInput = Integer.parseInt(getUserInput("\nWhich campground (enter 0 to cancel)?"));
 				if (campgroundInput != 0) {
-					if(campgroundInput <= campgroundsInChosenPark.size()) {
+					if(campgroundInput <= campgroundsInChosenPark.size() && 
+							campgroundInput > 0) {
 						
 						/***** HAPPY PATH *****/
 						Campground campgroundChosen = campgroundsInChosenPark.get(campgroundInput - 1);
@@ -203,13 +204,13 @@ public class CampgroundCLI {
 	 * @return true if the dates were entered in the correct order
 	 */
 	private boolean validDatePeriod(LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
+		boolean result = true;
 		Period period = Period.between(parsedArrivalDate, parsedDepartureDate);
 		if(period.getDays() < 1) {
 			System.out.println("Invalid dates. Try again.\n");
 			return false;
-		} else {
-			return true;
-		}
+		} 
+		return result;
 	}
 	
 	
@@ -245,17 +246,17 @@ public class CampgroundCLI {
 	 * @return false if the dates fall outside the campground's open season
 	 */
 	private boolean checkForAvailableSites(String campgroundName, LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
-		
+		boolean result = false;
 		List<Site> sites = siteDao.getTop5AvailableSites(campgroundName, parsedArrivalDate, parsedDepartureDate);
 		if(sites.size() == 0) {
 			System.out.println("No sites available during those dates.");
-			return false;
 			// return to getReservationDates()
 		} else {
 			/***** HAPPY PATH *****/
 			int days = Period.between(parsedArrivalDate, parsedDepartureDate).getDays();
-			return getSitesForChosenDates(sites, parsedArrivalDate, days);	
+			result = getSitesForChosenDates(sites, parsedArrivalDate, days);	
 		}
+		return result;
 	}
 
 
@@ -280,7 +281,7 @@ public class CampgroundCLI {
 				if (choice == 0) {
 					// user entered 0 to cancel, so exit the method
 					return false;
-				} else if (choice > sites.size()) {
+				} else if (choice > sites.size() || choice < 0) {
 					// user entered a number higher than the number of sites listed
 					System.out.println("Please enter a site number from the list above.");
 					// restart while loop to make another site selection
