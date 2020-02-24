@@ -169,7 +169,7 @@ public class CampgroundCLI {
 				
 				System.out.println("-------------------------------------------------------------------------------------------------");
 			
-				if (validDatePeriod(parsedArrivalDate, parsedDepartureDate)) {
+				if (parsedDepartureDate.isAfter(parsedArrivalDate)) {
 					// departureDate > arrivalDate
 					if (chosenDatesValidForCampground(campgroundChosen, parsedArrivalDate, parsedDepartureDate)) {
 						/***** HAPPY PATH *****/
@@ -187,6 +187,8 @@ public class CampgroundCLI {
 							// user will be presented with other campgrounds in the same park
 						}
 					}
+				} else {
+					System.out.println("Invalid dates. Try again.\n");
 				}
 			} catch(DateTimeParseException e) {
 				// user input could not be parsed into a LocalDate
@@ -195,22 +197,6 @@ public class CampgroundCLI {
 			}
 		}
 		return true;
-	}
-	
-	
-	/*********************************************************************************** 
-	 * This method checks that the arrival date precedes the departure date entered
-	 * 
-	 * @return true if the dates were entered in the correct order
-	 */
-	private boolean validDatePeriod(LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
-		boolean result = true;
-		Period period = Period.between(parsedArrivalDate, parsedDepartureDate);
-		if(period.getDays() < 1) {
-			System.out.println("Invalid dates. Try again.\n");
-			return false;
-		} 
-		return result;
 	}
 	
 	
@@ -253,7 +239,7 @@ public class CampgroundCLI {
 			// return to getReservationDates()
 		} else {
 			/***** HAPPY PATH *****/
-			int days = Period.between(parsedArrivalDate, parsedDepartureDate).getDays();
+			int days = (int)ChronoUnit.DAYS.between(parsedArrivalDate, parsedDepartureDate);
 			result = getSitesForChosenDates(sites, parsedArrivalDate, days);	
 		}
 		return result;
