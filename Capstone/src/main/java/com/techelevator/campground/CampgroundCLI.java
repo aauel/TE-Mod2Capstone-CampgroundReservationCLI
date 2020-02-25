@@ -286,7 +286,7 @@ public class CampgroundCLI {
 					/***** HAPPY PATH *****/
 					// prompt for a name for the reservation and then add new reservation to the database
 					validSiteChosen = true;
-					int siteId = sites.get(choice -1).getSiteId();
+					int siteId = getSiteIdFromInput(choice, sites);
 					finalizeReservation(siteId, parsedArrivalDate, days);
 				}
 			} catch (NumberFormatException e) {
@@ -445,6 +445,16 @@ public class CampgroundCLI {
 		for (Site s : sites) {
 			if (s.getSiteNumber() == siteChosen) {
 				result = true;
+			}
+		}
+		return result;
+	}
+	
+	private int getSiteIdFromInput (int input, List<Site> sites) {
+		int result = 0;
+		for (Site site : sites) {
+			if (site.getSiteNumber() == input) {
+				result = site.getSiteId();
 			}
 		}
 		return result;
