@@ -1,5 +1,7 @@
 package com.techelevator.campground.model;
 
+import java.util.List;
+
 public class Site {
 
 	private int siteId;
@@ -52,7 +54,15 @@ public class Site {
 	public void setUtilities(boolean utilities) {
 		this.utilities = utilities;
 	}
-	
+	public boolean seeIfSiteIsValid(int siteId, List<Site> sites) {
+		boolean result = false;
+		for (Site s : sites) {
+			if (s.getSiteNumber() == getSiteId()) {
+				result = true;
+			}
+		}
+		return result;
+	}
 	
 	
 }

@@ -49,7 +49,7 @@ public class Campground {
 		this.dailyFee = dailyFee;
 	}
 	
-	public boolean chosenDatesValidForCampground(LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
+	public boolean isOpen(LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
 		boolean result = false;
 		int fromMonth = Integer.parseInt(getOpenFromMm());
 		int toMonth = Integer.parseInt(getOpenToMm());

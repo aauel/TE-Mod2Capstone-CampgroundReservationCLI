@@ -18,6 +18,7 @@ public class JDBCReservationDAO implements ReservationDAO {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 	
+	//Inserts the new reservation into the DB
 	public int createReservationAndReturnId(String name, int siteId, LocalDate startDate, int days) {
 		int result = 0;
 		String sql = "INSERT INTO reservation (name, site_id, start_date, num_days) " +

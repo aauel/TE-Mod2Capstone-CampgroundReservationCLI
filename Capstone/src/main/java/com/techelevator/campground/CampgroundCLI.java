@@ -1,7 +1,10 @@
 package com.techelevator.campground;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.text.DateFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +36,7 @@ public class CampgroundCLI {
 	private ParkDAO parkDao;
 	private ReservationDAO reservationDao;
 	private Scanner scan = new Scanner(System.in);
+	private boolean reservationMade;
 	
 	private static final String PARK_MENU_VIEW_CAMPGROUNDS = "View This Park's Campgrounds";
 	private static final String PARK_MENU_SEARCH_FOR_RESERVATION = "Search for Reservation";
@@ -62,6 +66,7 @@ public class CampgroundCLI {
 	public void run() {
 		boolean finished = false;
 		while (!finished) {
+			reservationMade = false;
 			System.out.println("\n\nSelect a Park for Further Details");
 			Park park = (Park) menu.getChoiceFromOptions(parkDao.getAllParks().toArray(), true);
 			if (park != null) {
@@ -82,7 +87,7 @@ public class CampgroundCLI {
 	 */
 	private void handleParkChoice(Park parkChosen) {
 		boolean wantToSeePark = true;
-		while (wantToSeePark) {
+		while (wantToSeePark && !reservationMade) {
 			displayPark(parkChosen);
 			String choice = (String) menu.getChoiceFromOptions(PARK_MENU_OPTIONS);
 			if (choice.equals(PARK_MENU_VIEW_CAMPGROUNDS)) {
@@ -105,7 +110,7 @@ public class CampgroundCLI {
 	 */
 	private void viewCampgrounds(Park parkChosen) {
 		boolean startReservation = true;
-		while(startReservation) {
+		while(startReservation && !reservationMade) {
 			List<Campground> campgroundsInChosenPark = campgroundDao.getCampgroundsInPark(parkChosen.getParkId());
 			displayCampgrounds(parkChosen, campgroundsInChosenPark);
 			String choice = (String) menu.getChoiceFromOptions(CAMPGROUND_MENU_OPTIONS);
@@ -135,18 +140,17 @@ public class CampgroundCLI {
 			displayCampgrounds(parkChosen, campgroundsInChosenPark);
 			System.out.println();
 			boolean campgroundHasBeenChosen = true;
-			while(campgroundHasBeenChosen) {
+			while (campgroundHasBeenChosen && !reservationMade) {
 				try {
 					int campgroundInput = Integer.parseInt(getUserInput("\nWhich campground (enter 0 to cancel)?"));
 					if (campgroundInput != 0) {
-						if(campgroundInput <= campgroundsInChosenPark.size() && 
-								campgroundInput > 0) {
-							
+						if (campgroundInput <= campgroundsInChosenPark.size() && campgroundInput > 0) {
+
 							/***** HAPPY PATH *****/
 							campgroundHasBeenChosen = true;
 							Campground campgroundChosen = campgroundsInChosenPark.get(campgroundInput - 1);
 							restartReservation = getReservationDates(campgroundChosen);
-							
+
 						} else {
 							System.out.println("Not a valid campground");
 						}
@@ -154,11 +158,10 @@ public class CampgroundCLI {
 						campgroundHasBeenChosen = false;
 						restartReservation = true;
 					}
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					System.out.println("Not a valid campground, try again.");
 				}
 			}
-				
 		}
 	}
 	
@@ -183,6 +186,8 @@ public class CampgroundCLI {
 				String departureDate = getUserInput("What is the departure date? (YYYY-MM-DD)");
 				LocalDate parsedDepartureDate = LocalDate.parse(departureDate);
 				
+				
+				
 				/* TESTING ONLY */
 //				LocalDate parsedArrivalDate = LocalDate.of(2020, 2, 2);
 //				LocalDate parsedDepartureDate = LocalDate.of(2020, 2, 20);
@@ -194,7 +199,7 @@ public class CampgroundCLI {
 					result = false;
 				} else if (parsedDepartureDate.isAfter(parsedArrivalDate)) {
 					// departureDate > arrivalDate
-					if (campgroundChosen.chosenDatesValidForCampground(parsedArrivalDate, parsedDepartureDate)) {
+					if (campgroundChosen.isOpen(parsedArrivalDate, parsedDepartureDate)) {
 						/***** HAPPY PATH *****/
 						validDates = checkForAvailableSites(campgroundChosen, 
 															parsedArrivalDate, parsedDepartureDate);
@@ -339,6 +344,7 @@ public class CampgroundCLI {
 		System.out.println("-------------------------------------------------------------------------------------------------");
 		System.out.println("\nThe reservation has been made and the confirmation Id is " + reservationId);
 		System.out.println("\n-------------------------------------------------------------------------------------------------");	
+		reservationMade = true;
 	}
 	
 	
@@ -440,6 +446,12 @@ public class CampgroundCLI {
 		System.out.println("-------------------------------------------------------------------------------------------------");
 	}
 	
+	
+	
+	/*********************************************************************************** 
+	 * This method compares the site # to the input to see if the input is valid
+	 */
+	
 	private boolean seeIfSiteIsValid(int siteChosen, List<Site> sites) {
 		boolean result = false;
 		for (Site s : sites) {
@@ -449,6 +461,12 @@ public class CampgroundCLI {
 		}
 		return result;
 	}
+	
+	
+	
+	/*********************************************************************************** 
+	 * This method gets the siteId from the input(which matches the site #)
+	 */
 	
 	private int getSiteIdFromInput (int input, List<Site> sites) {
 		int result = 0;

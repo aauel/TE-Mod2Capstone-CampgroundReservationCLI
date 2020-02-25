@@ -21,7 +21,7 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 	
-	//Gets all campgrounds in a chosen park
+	//Gets all aspects of all campgrounds in a chosen park
 		@Override
 		public List<Campground> getCampgroundsInPark(int chosenParkId) {
 			List<Campground> campgrounds = new ArrayList<Campground>();
@@ -35,19 +35,9 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 			}
 			return campgrounds;
 		}
-
-		@Override
-		public Campground getCampgroundByCampgroundId(int campgroundId) {
-			Campground camp = new Campground();
-			String sql = "SELECT campground_id, park_id, name, open_from_mm, open_to_mm, daily_fee " +
-						 "FROM campground WHERE campground_id = ?;";
-			SqlRowSet result = jdbcTemplate.queryForRowSet(sql, campgroundId);
-			while(result.next()) {
-				camp = mapRowToCampground(result);
-			}
-			return camp;
-		}
 		
+	//Gets the daily fee for the campground (we decided to do this instead of having to pass the campground object
+	// through 3 different methods just to use it to get it's daily fee. thought it was more readable.)
 		@Override
 		public BigDecimal getDailyFeeByCampgroundId(int campgroundId) {
 			String slq = "SELECT daily_fee FROM campground WHERE campground_id = ?;";

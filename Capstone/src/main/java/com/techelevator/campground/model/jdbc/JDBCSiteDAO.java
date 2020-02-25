@@ -24,11 +24,14 @@ public class JDBCSiteDAO implements SiteDAO {
 	public List<Site> getTop5AvailableSites(int campgroundId, LocalDate arrivalDate, LocalDate departureDate) {
 		List<Site> sites = new ArrayList<Site>();
 		String sql = "SELECT site.site_id, site.campground_id, site_number, max_occupancy, accessible, max_rv_length, utilities " + 
+					 	//Gets all information for the sites
 					 "FROM site " + 
 					 "WHERE campground_id = ? AND site.site_id NOT IN " + 
 					 "(SELECT site_id FROM reservation " + 
 					 "WHERE ((reservation.start_date, reservation.start_date + num_days) OVERLAPS " + 
 					 "(DATE(?), DATE(?)))) " + 
+					 	//Gets the sites from the chosen campground where the site is NOT already reserved for the
+					 	//dates that the new reservation was requested (i.e. makes sure site isn't already booked)
 					 "ORDER BY site_number " +
 					 "LIMIT 5;";
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, campgroundId, arrivalDate, departureDate);
