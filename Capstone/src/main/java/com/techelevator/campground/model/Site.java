@@ -2,37 +2,37 @@ package com.techelevator.campground.model;
 
 public class Site {
 
-	private int site_id;
-	private int campground_id;
-	private int site_number;
-	private int max_occupancy = 6;
+	private int siteId;
+	private int campgroundId;
+	private int siteNumber;
+	private int maxOccupancy = 6;
 	private boolean accessible =  false;
-	private int max_rv_length = 0;
+	private int maxRvLength = 0;
 	private boolean utilities = false;
 	
-	public int getSite_id() {
-		return site_id;
+	public int getSiteId() {
+		return siteId;
 	}
-	public void setSite_id(int site_id) {
-		this.site_id = site_id;
+	public void setSiteId(int siteId) {
+		this.siteId = siteId;
 	}
-	public int getCampground_id() {
-		return campground_id;
+	public int getCampgroundId() {
+		return campgroundId;
 	}
-	public void setCampground_id(int campground_id) {
-		this.campground_id = campground_id;
+	public void setCampgroundId(int campgroundId) {
+		this.campgroundId = campgroundId;
 	}
-	public int getSite_number() {
-		return site_number;
+	public int getSiteNumber() {
+		return siteNumber;
 	}
-	public void setSite_number(int site_number) {
-		this.site_number = site_number;
+	public void setSiteNumber(int siteNumber) {
+		this.siteNumber = siteNumber;
 	}
-	public int getMax_occupancy() {
-		return max_occupancy;
+	public int getMaxOccupancy() {
+		return maxOccupancy;
 	}
-	public void setMax_occupancy(int max_occupancy) {
-		this.max_occupancy = max_occupancy;
+	public void setMaxOccupancy(int maxOccupancy) {
+		this.maxOccupancy = maxOccupancy;
 	}
 	public boolean isAccessible() {
 		return accessible;
@@ -40,11 +40,11 @@ public class Site {
 	public void setAccessible(boolean accessible) {
 		this.accessible = accessible;
 	}
-	public int getMax_rv_length() {
-		return max_rv_length;
+	public int getMaxRvLength() {
+		return maxRvLength;
 	}
-	public void setMax_rv_length(int max_rv_length) {
-		this.max_rv_length = max_rv_length;
+	public void setMaxRvLength(int maxRvLength) {
+		this.maxRvLength = maxRvLength;
 	}
 	public boolean isUtilities() {
 		return utilities;

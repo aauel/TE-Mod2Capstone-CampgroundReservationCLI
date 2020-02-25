@@ -4,24 +4,24 @@ import java.time.LocalDate;
 
 public class Reservation {
 
-	private int reservation_id;
-	private int site_id;
+	private int reservationId;
+	private int siteId;
 	private String name;
-	private LocalDate start_date;
-	private int num_days;
-	private LocalDate create_date = LocalDate.now();
+	private LocalDate startDate;
+	private int numDays;
+	private LocalDate createDate = LocalDate.now();
 	
-	public int getReservation_id() {
-		return reservation_id;
+	public int getReservationId() {
+		return reservationId;
 	}
-	public void setReservation_id(int reservation_id) {
-		this.reservation_id = reservation_id;
+	public void setReservationId(int reservationId) {
+		this.reservationId = reservationId;
 	}
-	public int getSite_id() {
-		return site_id;
+	public int getSiteId() {
+		return siteId;
 	}
-	public void setSite_id(int site_id) {
-		this.site_id = site_id;
+	public void setSiteId(int siteId) {
+		this.siteId = siteId;
 	}
 	public String getName() {
 		return name;
@@ -29,23 +29,23 @@ public class Reservation {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public LocalDate getStart_date() {
-		return start_date;
+	public LocalDate getStartDate() {
+		return startDate;
 	}
-	public void setStart_date(LocalDate start_date) {
-		this.start_date = start_date;
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
 	}
-	public int getNum_days() {
-		return num_days;
+	public int getNumDays() {
+		return numDays;
 	}
-	public void setNum_days(int num_days) {
-		this.num_days = num_days;
+	public void setNumDays(int numDays) {
+		this.numDays = numDays;
 	}
-	public LocalDate getCreate_date() {
-		return create_date;
+	public LocalDate getCreateDate() {
+		return createDate;
 	}
-	public void setCreate_date(LocalDate create_date) {
-		this.create_date = create_date;
+	public void setCreateDate(LocalDate createDate) {
+		this.createDate = createDate;
 	}
 	
 	

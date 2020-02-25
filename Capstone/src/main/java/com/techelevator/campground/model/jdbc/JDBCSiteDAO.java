@@ -21,19 +21,17 @@ public class JDBCSiteDAO implements SiteDAO {
 	}
 
 	@Override
-	public List<Site> getTop5AvailableSites(String campground_name, LocalDate arrivalDate, LocalDate departureDate) {
+	public List<Site> getTop5AvailableSites(int campgroundId, LocalDate arrivalDate, LocalDate departureDate) {
 		List<Site> sites = new ArrayList<Site>();
-		String sql = "SELECT DISTINCT site.site_id, site.campground_id, site_number, max_occupancy, accessible, max_rv_length, utilities " + 
+		String sql = "SELECT site.site_id, site.campground_id, site_number, max_occupancy, accessible, max_rv_length, utilities " + 
 					 "FROM site " + 
-					 "JOIN campground ON campground.campground_id = site.campground_id " + 
-					 "LEFT JOIN reservation ON site.site_id = reservation.site_id " + 
-					 "WHERE campground.name = ? AND site.site_id NOT IN " + 
+					 "WHERE campground_id = ? AND site.site_id NOT IN " + 
 					 "(SELECT site_id FROM reservation " + 
 					 "WHERE ((reservation.start_date, reservation.start_date + num_days) OVERLAPS " + 
 					 "(DATE(?), DATE(?)))) " + 
 					 "ORDER BY site_number " +
 					 "LIMIT 5;";
-		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, campground_name, arrivalDate, departureDate);
+		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, campgroundId, arrivalDate, departureDate);
 		while(results.next()) {
 			sites.add(mapRowToSite(results));
 		}
@@ -43,12 +41,12 @@ public class JDBCSiteDAO implements SiteDAO {
 	
 	private Site mapRowToSite(SqlRowSet row) {
 		Site site = new Site();
-		site.setSite_id(row.getInt("site_id"));
-		site.setCampground_id(row.getInt("campground_id"));
-		site.setSite_number(row.getInt("site_number"));
-		site.setMax_occupancy(row.getInt("max_occupancy"));
+		site.setSiteId(row.getInt("site_id"));
+		site.setCampgroundId(row.getInt("campground_id"));
+		site.setSiteNumber(row.getInt("site_number"));
+		site.setMaxOccupancy(row.getInt("max_occupancy"));
 		site.setAccessible(row.getBoolean("accessible"));
-		site.setMax_rv_length(row.getInt("max_rv_length"));
+		site.setMaxRvLength(row.getInt("max_rv_length"));
 		site.setUtilities(row.getBoolean("utilities"));
 		return site;
 	}

@@ -23,14 +23,13 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 	
 	//Gets all campgrounds in a chosen park
 		@Override
-		public List<Campground> getCampgroundsInPark(int chosen_park_id) {
+		public List<Campground> getCampgroundsInPark(int chosenParkId) {
 			List<Campground> campgrounds = new ArrayList<Campground>();
-			String sql = "SELECT campground.campground_id, campground.park_id, campground.name, " +
+			String sql = "SELECT campground_id, campground.park_id, campground.name, " +
 						 "campground.open_from_mm, campground.open_to_mm, campground.daily_fee "
 					   + "FROM campground " 
-					   + "JOIN park ON campground.park_id = park.park_id "
-					   + "WHERE park.park_id = ? ORDER BY campground.name;";
-			SqlRowSet results = jdbcTemplate.queryForRowSet(sql, chosen_park_id);
+					   + "WHERE park_id = ? ORDER BY name;";
+			SqlRowSet results = jdbcTemplate.queryForRowSet(sql, chosenParkId);
 			while(results.next()) {
 				campgrounds.add(mapRowToCampground(results));
 			}
@@ -38,11 +37,11 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 		}
 
 		@Override
-		public Campground getCampgroundByCampgroundId(int campground_id) {
+		public Campground getCampgroundByCampgroundId(int campgroundId) {
 			Campground camp = new Campground();
 			String sql = "SELECT campground_id, park_id, name, open_from_mm, open_to_mm, daily_fee " +
 						 "FROM campground WHERE campground_id = ?;";
-			SqlRowSet result = jdbcTemplate.queryForRowSet(sql, campground_id);
+			SqlRowSet result = jdbcTemplate.queryForRowSet(sql, campgroundId);
 			while(result.next()) {
 				camp = mapRowToCampground(result);
 			}
@@ -50,9 +49,9 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 		}
 		
 		@Override
-		public BigDecimal getDailyFeeByCampgroundId(int campground_id) {
+		public BigDecimal getDailyFeeByCampgroundId(int campgroundId) {
 			String slq = "SELECT daily_fee FROM campground WHERE campground_id = ?;";
-			SqlRowSet result = jdbcTemplate.queryForRowSet(slq, campground_id);
+			SqlRowSet result = jdbcTemplate.queryForRowSet(slq, campgroundId);
 			result.next();
 			return result.getBigDecimal("daily_fee");
 		}
@@ -60,12 +59,12 @@ public class JDBCCampgroundDAO implements CampgroundDAO {
 		//Creates a Campground object from a sqlRow
 		private Campground mapRowToCampground(SqlRowSet row) {
 			Campground campground = new Campground();
-			campground.setCampground_id(row.getInt("campground_id"));
-			campground.setPark_id(row.getInt("park_id"));
+			campground.setCampgroundId(row.getInt("campground_id"));
+			campground.setParkId(row.getInt("park_id"));
 			campground.setName(row.getString("name"));
-			campground.setOpen_from_mm(row.getString("open_from_mm"));
-			campground.setOpen_to_mm(row.getString("open_to_mm"));
-			campground.setDaily_fee(row.getBigDecimal("daily_fee"));
+			campground.setOpenFromMm(row.getString("open_from_mm"));
+			campground.setOpenToMm(row.getString("open_to_mm"));
+			campground.setDailyFee(row.getBigDecimal("daily_fee"));
 			return campground;
 		}
 		

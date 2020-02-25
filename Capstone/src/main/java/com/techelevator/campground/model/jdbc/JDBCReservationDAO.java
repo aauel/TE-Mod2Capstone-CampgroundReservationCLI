@@ -18,17 +18,15 @@ public class JDBCReservationDAO implements ReservationDAO {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 	
-	public int createReservationAndReturnId(String name, int site_id, LocalDate startDate, int days) {
+	public int createReservationAndReturnId(String name, int siteId, LocalDate startDate, int days) {
 		int result = 0;
 		String sql = "INSERT INTO reservation (name, site_id, start_date, num_days) " +
 					 "VALUES (?, ?, ?, ?) RETURNING reservation_id;";
-		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, name, site_id, startDate, days);
+		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, name, siteId, startDate, days);
 		while(results.next()) {
 			result = results.getInt("reservation_id");
 		}
 		return result;
 	}
-	
-	
-	
+
 }

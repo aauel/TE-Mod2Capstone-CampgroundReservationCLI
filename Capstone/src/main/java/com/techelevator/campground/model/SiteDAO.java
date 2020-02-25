@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface SiteDAO {
 
-	public List<Site> getTop5AvailableSites(String campground_name, LocalDate arrivalDate, LocalDate departureDate);
+	public List<Site> getTop5AvailableSites(int campgroundId, LocalDate arrivalDate, LocalDate departureDate);
 	
 }

@@ -4,11 +4,12 @@ import java.time.LocalDate;
 
 public class Park {
 
-	private int park_id;
+	private int parkId;
 	private String name;
 	private String location;
-	private LocalDate establish_date;
+	private LocalDate establishDate;
 	private int area;
+	
 	public int getArea() {
 		return area;
 	}
@@ -18,11 +19,11 @@ public class Park {
 	private int visitors;
 	private String description;
 	
-	public int getPark_id() {
-		return park_id;
+	public int getParkId() {
+		return parkId;
 	}
-	public void setPark_id(int park_id) {
-		this.park_id = park_id;
+	public void setParkId(int parkId) {
+		this.parkId = parkId;
 	}
 	public String getName() {
 		return name;
@@ -36,11 +37,11 @@ public class Park {
 	public void setLocation(String location) {
 		this.location = location;
 	}
-	public LocalDate getEstablish_date() {
-		return establish_date;
+	public LocalDate getEstablishDate() {
+		return establishDate;
 	}
-	public void setEstablish_date(LocalDate establish_date) {
-		this.establish_date = establish_date;
+	public void setEstablishDate(LocalDate establishDate) {
+		this.establishDate = establishDate;
 	}
 	public int getVisitors() {
 		return visitors;
@@ -55,5 +56,9 @@ public class Park {
 		this.description = description;
 	}
 	
+	@Override
+	public String toString() {
+		return getName();
+	}
 	
 }

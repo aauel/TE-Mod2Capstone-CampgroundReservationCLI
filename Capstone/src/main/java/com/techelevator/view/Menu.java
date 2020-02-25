@@ -9,6 +9,7 @@ public class Menu {
 
 	private PrintWriter out;
 	private Scanner in;
+	private boolean includeQuit;
 
 	public Menu(InputStream input, OutputStream output) {
 		this.out = new PrintWriter(output);
@@ -16,31 +17,35 @@ public class Menu {
 	}
 
 	public Object getChoiceFromOptions(Object[] options) {
+		return getChoiceFromOptions(options, false);
+	}
+	
+	public Object getChoiceFromOptions(Object[] options, boolean includeQuit) {
+		this.includeQuit = includeQuit;
 		Object choice = null;
-		while (choice == null) {
-			displayMenuOptions(options);
-			choice = getChoiceFromUserInput(options);
-		}
+		displayMenuOptions(options);
+		choice = getChoiceFromUserInput(options);
 		return choice;
 	}
 
 	private Object getChoiceFromUserInput(Object[] options) {
 		Object choice = null;
-		String userInput = in.nextLine();
-		try {
-			int selectedOption = Integer.valueOf(userInput);
-			if (selectedOption > 0 && selectedOption <= options.length) {
-				choice = options[selectedOption - 1];
+		while (choice == null) {
+			String userInput = in.nextLine();
+			try {
+				int selectedOption = Integer.valueOf(userInput);
+				if (selectedOption > 0 && selectedOption <= options.length) {
+					choice = options[selectedOption - 1];
+				}
+			} catch (NumberFormatException e) {
+				// eat the exception, an error message will be displayed below since choice will be null
 			}
-		} catch (NumberFormatException e) {
-			// eat the exception, an error message will be displayed below since choice will be null
-		}
-		if(userInput.toUpperCase().equals("Q")) {
-			System.out.println("Goodbye!");
-			System.exit(0);
-		}
-		if (choice == null) {
-			out.println("\n*** " + userInput + " is not a valid option ***\n");
+			if (userInput.toUpperCase().equals("Q")) {
+				return null;
+			} else if (choice == null) {
+				out.println("\n*** " + userInput + " is not a valid option ***\n");
+				out.flush();
+			}
 		}
 		return choice;
 	}
@@ -49,12 +54,11 @@ public class Menu {
 		out.println();
 		for (int i = 0; i < options.length; i++) {
 			int optionNum = i + 1;
-			if (options[i].equals("Quit")) {
-				out.println("Q) Quit");
-			} else {
-				out.println(optionNum + ") " + options[i]);
-			}
+			out.println(optionNum + ") " + options[i]);
 		}
+		if (includeQuit) {
+			out.println("Q) Quit");
+		} 
 	
 		out.print("\nPlease choose an option >>> ");
 		out.flush();

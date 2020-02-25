@@ -1,27 +1,28 @@
 package com.techelevator.campground.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class Campground {
 
-	private int campground_id;
-	private int park_id;
+	private int campgroundId;
+	private int parkId;
 	private String name;
-	private String open_from_mm;
-	private String open_to_mm;
-	private BigDecimal daily_fee;
+	private String openFromMm;
+	private String openToMm;
+	private BigDecimal dailyFee;
 	
-	public int getCampground_id() {
-		return campground_id;
+	public int getCampgroundId() {
+		return campgroundId;
 	}
-	public void setCampground_id(int campground_id) {
-		this.campground_id = campground_id;
+	public void setCampgroundId(int campgroundId) {
+		this.campgroundId = campgroundId;
 	}
-	public int getPark_id() {
-		return park_id;
+	public int getParkId() {
+		return parkId;
 	}
-	public void setPark_id(int park_id) {
-		this.park_id = park_id;
+	public void setParkId(int parkId) {
+		this.parkId = parkId;
 	}
 	public String getName() {
 		return name;
@@ -29,23 +30,39 @@ public class Campground {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getOpen_from_mm() {
-		return open_from_mm;
+	public String getOpenFromMm() {
+		return openFromMm;
 	}
-	public void setOpen_from_mm(String open_from_mm) {
-		this.open_from_mm = open_from_mm;
+	public void setOpenFromMm(String getOpenFromMm) {
+		this.openFromMm = getOpenFromMm;
 	}
-	public String getOpen_to_mm() {
-		return open_to_mm;
+	public String getOpenToMm() {
+		return openToMm;
 	}
-	public void setOpen_to_mm(String open_to_mm) {
-		this.open_to_mm = open_to_mm;
+	public void setOpenToMm(String openToMm) {
+		this.openToMm = openToMm;
 	}
-	public BigDecimal getDaily_fee() {
-		return daily_fee;
+	public BigDecimal getDailyFee() {
+		return dailyFee;
 	}
-	public void setDaily_fee(BigDecimal daily_fee) {
-		this.daily_fee = daily_fee;
+	public void setDailyFee(BigDecimal dailyFee) {
+		this.dailyFee = dailyFee;
+	}
+	
+	public boolean chosenDatesValidForCampground(LocalDate parsedArrivalDate, LocalDate parsedDepartureDate) {
+		boolean result = false;
+		int fromMonth = Integer.parseInt(getOpenFromMm());
+		int toMonth = Integer.parseInt(getOpenToMm());
+
+		int parsedArrivalMonth = parsedArrivalDate.getMonthValue();
+		int parsedDepartureMonth = parsedDepartureDate.getMonthValue();
+
+		if (parsedArrivalMonth >= fromMonth && parsedArrivalMonth <= toMonth) {
+			if (parsedDepartureMonth >= fromMonth && parsedDepartureMonth <= toMonth) {
+				result = true;
+			}
+		}
+		return result;
 	}
 
 }
