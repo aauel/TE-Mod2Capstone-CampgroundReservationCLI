@@ -181,10 +181,10 @@ public class CampgroundCLI {
 		while(!validDates) {
 			try {
 				// Prompt user for arrival and departure dates
-				String arrivalDate = getUserInput("What is the arrival date? (YYYY-MM-DD)");
-				LocalDate parsedArrivalDate = LocalDate.parse(arrivalDate);
-				String departureDate = getUserInput("What is the departure date? (YYYY-MM-DD)");
-				LocalDate parsedDepartureDate = LocalDate.parse(departureDate);
+				String arrivalDate = getUserInput("What is the arrival date? (MM-DD-YYYY)");
+				LocalDate parsedArrivalDate = formatDate(arrivalDate);
+				String departureDate = getUserInput("What is the departure date? (MM-DD-YYYY)");
+				LocalDate parsedDepartureDate = formatDate(departureDate);
 				
 				
 				
@@ -227,15 +227,6 @@ public class CampgroundCLI {
 		}
 		return result;
 	}
-	
-	
-	/*********************************************************************************** 
-	 * This method checks that the arrival and departure dates entered against the
-	 * specific campground's open season
-	 * 
-	 * @param campgroundChosen
-	 * @return true if the dates fall inside the campground's open season
-	 */
 
 
 	
@@ -421,6 +412,24 @@ public class CampgroundCLI {
 			charsWritten += w.length() + 1;
 		}
 	}
+	
+	
+	
+//	/*********************************************************************************** 
+//	 * This method converts the user input date into a usable date format
+	
+	
+	private LocalDate formatDate(String dateInput) {
+		//06-02-2020 --> 2020-06-02
+		int month = Integer.parseInt(dateInput.substring(0,2));
+		int day = Integer.parseInt(dateInput.substring(3,5));
+		int year = Integer.parseInt(dateInput.substring(6));
+	
+		LocalDate parsedDate = LocalDate.of(year, month, day);
+		return parsedDate;
+	}
+	
+
 	
 	/*********************************************************************************** 
 	 * This method prints a list of campgrounds and corresponding attributes for a 

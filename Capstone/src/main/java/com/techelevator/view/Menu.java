@@ -10,6 +10,8 @@ public class Menu {
 	private PrintWriter out;
 	private Scanner in;
 	private boolean includeQuit;
+	
+	private static final String QUIT_OPTION = "Q) Quit";
 
 	public Menu(InputStream input, OutputStream output) {
 		this.out = new PrintWriter(output);
@@ -23,26 +25,32 @@ public class Menu {
 	public Object getChoiceFromOptions(Object[] options, boolean includeQuit) {
 		this.includeQuit = includeQuit;
 		Object choice = null;
-		displayMenuOptions(options);
-		choice = getChoiceFromUserInput(options);
+		while (choice == null) {
+			displayMenuOptions(options);
+			choice = getChoiceFromUserInput(options);
+		}
+		if (choice == QUIT_OPTION) {
+			choice = null;
+		}
 		return choice;
 	}
 
 	private Object getChoiceFromUserInput(Object[] options) {
 		Object choice = null;
-		while (choice == null) {
-			String userInput = in.nextLine();
+		String userInput = in.nextLine();
+		if (userInput.toUpperCase().equals("Q")) {
+			choice = QUIT_OPTION;
+		} else {
 			try {
 				int selectedOption = Integer.valueOf(userInput);
 				if (selectedOption > 0 && selectedOption <= options.length) {
 					choice = options[selectedOption - 1];
 				}
 			} catch (NumberFormatException e) {
-				// eat the exception, an error message will be displayed below since choice will be null
+				// eat the exception, an error message will be displayed below since choice will
+				// be null
 			}
-			if (userInput.toUpperCase().equals("Q")) {
-				return null;
-			} else if (choice == null) {
+			if (choice == null) {
 				out.println("\n*** " + userInput + " is not a valid option ***\n");
 				out.flush();
 			}
@@ -57,7 +65,7 @@ public class Menu {
 			out.println(optionNum + ") " + options[i]);
 		}
 		if (includeQuit) {
-			out.println("Q) Quit");
+			out.println(QUIT_OPTION);
 		} 
 	
 		out.print("\nPlease choose an option >>> ");
