@@ -359,7 +359,7 @@ public class CampgroundCLI {
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setUrl("jdbc:postgresql://localhost:5432/campground");
 		dataSource.setUsername("postgres");
-		dataSource.setPassword("postgres1");
+		dataSource.setPassword(System.getenv("DB_PASSWORD"));
 		
 		parkDao = new JDBCParkDAO(dataSource);	
 		campgroundDao = new JDBCCampgroundDAO(dataSource);
