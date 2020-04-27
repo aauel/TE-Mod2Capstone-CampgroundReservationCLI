@@ -186,12 +186,6 @@ public class CampgroundCLI {
 				String departureDate = getUserInput("What is the departure date? (MM-DD-YYYY)");
 				LocalDate parsedDepartureDate = formatDate(departureDate);
 				
-				
-				
-				/* TESTING ONLY */
-//				LocalDate parsedArrivalDate = LocalDate.of(2020, 2, 2);
-//				LocalDate parsedDepartureDate = LocalDate.of(2020, 2, 20);
-				
 				System.out.println("-------------------------------------------------------------------------------------------------");
 			
 				if (parsedArrivalDate.isBefore(LocalDate.now()) || parsedDepartureDate.isBefore(LocalDate.now())) {
@@ -414,11 +408,6 @@ public class CampgroundCLI {
 	}
 	
 	
-	
-//	/*********************************************************************************** 
-//	 * This method converts the user input date into a usable date format
-	
-	
 	private LocalDate formatDate(String dateInput) {
 		//06-02-2020 --> 2020-06-02
 		int month = Integer.parseInt(dateInput.substring(0,2));
@@ -430,7 +419,6 @@ public class CampgroundCLI {
 	}
 	
 
-	
 	/*********************************************************************************** 
 	 * This method prints a list of campgrounds and corresponding attributes for a 
 	 * specific park to the system console
@@ -456,7 +444,6 @@ public class CampgroundCLI {
 	}
 	
 	
-	
 	/*********************************************************************************** 
 	 * This method compares the site # to the input to see if the input is valid
 	 */
@@ -472,11 +459,9 @@ public class CampgroundCLI {
 	}
 	
 	
-	
 	/*********************************************************************************** 
 	 * This method gets the siteId from the input(which matches the site #)
 	 */
-	
 	private int getSiteIdFromInput (int input, List<Site> sites) {
 		int result = 0;
 		for (Site site : sites) {
